@@ -1,3 +1,22 @@
+async function getSourceLanguage(text) {
+  const url = 'https://gateway.watsonplatform.net/language-translator/api/v2/identify';
+  const username = '55d77b95-111c-4abb-9226-ff1ba10e66d9';
+  const password = 'qBh8qevbajWp';
+  const headers = new Headers();
+  headers.append('Authorization', 'Basic ' + btoa(username+':'+password));
+  headers.append('Content-Type', 'text/plain');
+  headers.append('Accept', 'application/json');
+  const data = 'text=' + text;
+  const initOptions = {
+    method: 'post',
+    headers: headers,
+    body: data
+  };
+  return await fetch(url, initOptions)
+  .then(res => res.json())
+  .then(body => body.languages[0].language);
+}
+
 async function translate(text) {
   const url = 'https://gateway.watsonplatform.net/language-translator/api/v2/translate';
   const username = '55d77b95-111c-4abb-9226-ff1ba10e66d9';
@@ -6,20 +25,12 @@ async function translate(text) {
   headers.append('Authorization', 'Basic ' + btoa(username+':'+password));
   headers.append('Content-Type', 'application/json');
   headers.append('Accept', 'application/json');
-  const data = {
-    text: text,
-    source: 'en',
-    target: 'es'
-  };
-  const initOptions = {
-    method: 'post',
-    headers: headers,
-    body: JSON.stringify(data)
-  };
-
-  return await fetch(url, initOptions)
-  .then(res => res.json())
-  .then(body => body.translations[0].translation)
+  return await getSourceLanguage(text)
+  .then(source => {return {text: text, source: source, target: 'es'}})
+  .then(data => {return {method: 'post', headers: headers, body: JSON.stringify(data)}})
+  .then(initOptions => fetch(url, initOptions))
+  .then(res => {console.log(res); return res.json();})
+  .then(body => {console.log(body); return body.translations[0].translation;})
   .catch(error => {console.log(error); return 'Error';});
 };
 
