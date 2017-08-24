@@ -26,7 +26,7 @@ async function translate(text) {
   headers.append('Content-Type', 'application/json');
   headers.append('Accept', 'application/json');
   return await getSourceLanguage(text)
-  .then(source => {return {text: text, source: source, target: 'es'}})
+  .then(source => {return {text: text, source: source, target: 'en'}})
   .then(data => {return {method: 'post', headers: headers, body: JSON.stringify(data)}})
   .then(initOptions => fetch(url, initOptions))
   .then(res => {console.log(res); return res.json();})
